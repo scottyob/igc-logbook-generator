@@ -1,0 +1,24 @@
+{
+  "name": "igc-logbook-generator",
+  "version": "1.0.0",
+  "description": "Generates logbook (markdown) entries from CSV files, igc files and kvm launch site files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Scott O'Brien",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^9.4.1",
+    "fs": "^0.0.1-security",
+    "geolocation-utils": "^1.2.5",
+    "igc-parser": "^1.1.0"
+  },
+  "bin": {
+    "logbook": "./index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.0",
+    "ts-node": "^10.9.1"
+  }
+}
