@@ -4,8 +4,8 @@ const { Command } = require("commander");
 const program = new Command();
 
 import { readFileSync, readdirSync } from "fs";
-import IGCParser = require("igc-parser");
-import GeoLocation = require("geolocation-utils");
+import IGCParser from "igc-parser";
+import {distanceTo} from 'geolocation-utils';
 
 type LogRecord = {
   date: string;
@@ -27,14 +27,14 @@ type LogRecord = {
 function parseFile(igc: IGCParser.IGCFile): LogRecord {
   return {
     date: igc.date,
-    wing: igc.gliderType,
+    wing: igc.gliderType!,
     durationSeconds:
       (igc.fixes[igc.fixes.length - 1].timestamp - igc.fixes[0].timestamp) /
       1000,
     maxDistanceMeters: Math.max(
-      ...igc.fixes.map((f) => GeoLocation.distanceTo(igc.fixes[0], f))
+      ...igc.fixes.map((f) => distanceTo(igc.fixes[0], f))
     ),
-    maxAltitudeMeters: Math.max(...igc.fixes.map((f) => f.gpsAltitude)),
+    maxAltitudeMeters: Math.max(...igc.fixes.map((f) => f.gpsAltitude!)),
     trackLengthMeters: igc.fixes.reduce(
       (previousValue, currentValue, currentIndex) => {
         if (currentIndex === 0) {
@@ -43,7 +43,7 @@ function parseFile(igc: IGCParser.IGCFile): LogRecord {
         // Work out the distance to the last point
         return (
           previousValue +
-          GeoLocation.distanceTo(igc.fixes[currentIndex - 1], currentValue)
+          distanceTo(igc.fixes[currentIndex - 1], currentValue)
         );
       },
       0
@@ -53,7 +53,7 @@ function parseFile(igc: IGCParser.IGCFile): LogRecord {
         if (index == 0) {
           return 0;
         }
-        const difference = value.gpsAltitude - igc.fixes[index - 1].gpsAltitude;
+        const difference = value.gpsAltitude! - igc.fixes[index - 1].gpsAltitude!;
         return difference > 0 ? difference : 0;
       })
       .reduce((partialSum, a) => partialSum + a, 0),
@@ -71,7 +71,7 @@ program
   .argument("<srcDirectory>", "Directory to find igc files in")
   .description("Builds a logbook from source files")
   .action("build")
-  .action((srcDirectory) => {
+  .action((srcDirectory: string) => {
     const logbook = readdirSync(srcDirectory)
       .filter((f) => f.endsWith(".igc"))
       .map((f) => {
