@@ -38,10 +38,26 @@ type LogRecord = {
   flightNumber?: number; // The record of flight
 };
 
+
+/*
+ * A launch or landing site, as found from the paragliding launches database
+*/
+type Launch = {
+  name: string;
+  longitude: number;
+  latitude: number;
+}
+
+
 /*
  * Parse IGC file
  */
-function parseFile(igc: IGCParser.IGCFile): LogRecord {
+function parseFile(igc: IGCParser.IGCFile, launches: Launch[]): LogRecord {
+  // Calculate the closest launch (within a 1km margin)
+  const launchDistances = launches.map(l => distanceTo(igc.fixes[0], l));
+  const shortestDistance = Math.min(...launchDistances)
+  const closestLaunch = shortestDistance < 1000 ? launches[launchDistances.indexOf(shortestDistance)] : undefined;
+  
   return {
     date: igc.date,
     wing: igc.gliderType!,
@@ -76,6 +92,7 @@ function parseFile(igc: IGCParser.IGCFile): LogRecord {
       .reduce((partialSum, a) => partialSum + a, 0),
     launchTime: igc.fixes[0].timestamp,
     ...(igc?.task?.comment && { comment: igc?.task?.comment }),
+    launchName: closestLaunch?.name,
   };
 }
 
@@ -87,9 +104,14 @@ program
 program
   .command("build")
   .argument("<srcDirectory>", "Directory to find igc files in")
+  .option("--launches <string>", "kmz file containing launches")
   .description("Builds a logbook from source files")
   .action("build")
-  .action((srcDirectory: string) => {
+  .action((srcDirectory: string, options: any) => {
+    // Read the launches into memory
+    const buffer = readFileSync(options['launches'], {flag: "r", encoding: "utf8"})
+    const launches: Launch[] = JSON.parse(buffer);
+    
     // Import all IGC, vario logged flights
     let logbook = readdirSync(srcDirectory)
       .filter((f) => f.endsWith(".igc"))
@@ -99,7 +121,7 @@ program
           encoding: "utf8",
         });
         const igc = IGCParser.parse(buffer);
-        let ret = parseFile(igc);
+        let ret = parseFile(igc, launches);
         ret.fileName = f;
         return ret;
       });
