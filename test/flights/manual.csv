@@ -1,4 +1,4 @@
 date,wing,durationSeconds,maxDistanceMeters,maxAltitudeMeters,trackLengthMeters,altitudeGainMeters,comment,fileName,launchName,location
 2022-10-18,BGD Epic,500,,,,,"Yeah, CSV",,,Mission
-2022-10-17,BGD Epic,500,,,,,Some manual flight,,,ED Levin
-2022-10-18,BGD Epic,800,,,,,Another manual comment,,,ED Levin
+2022-10-17,BGD Epic,500,,,,,Some manual flight,,,Ed Levin
+2022-10-18,BGD Epic,800,,,,,Another manual comment,,,Ed Levin
