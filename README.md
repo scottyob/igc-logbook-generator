@@ -33,12 +33,6 @@ A lot of launches in this database will look something like
 
 The interesting part of this would be "Mission" or "Ed Levin", so the icea is storing sites.json is to store a list of strings containing site names that are used as a substring match.
 
-```
-[
-    "Mission",
-    "Ed Levin"
-]
-```
 
 ### Building Launch File
 

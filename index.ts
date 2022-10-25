@@ -155,7 +155,10 @@ function parseCsvs(srcDirectory: string): LogRecord[] {
 * Replace locations from a file
 */
 function replaceLocations(fileName: string, logbook: LogRecord[]): LogRecord[] {
-  const locations: string[] = JSON.parse(readFileSync(fileName, {
+  type LocationsFile = {
+    [key: string]: string[];
+  }
+  const locations: LocationsFile = JSON.parse(readFileSync(fileName, {
     flag: "r",
     encoding: "utf8",
   }));
@@ -165,8 +168,13 @@ function replaceLocations(fileName: string, logbook: LogRecord[]): LogRecord[] {
       return r;
     }
     // Find location mame that matches (any really)
-    r.location = locations.filter(l => r.launchName?.includes(l))[0];
-    // console.debug(locations.filter(l => r.launchName?.includes(l)));
+
+    Object.keys(locations).forEach(key => {
+      if(locations[key].some(l => r.launchName?.includes(l))) {
+        r.location = key;
+        return;
+      }
+    });
     return r;
   });
 }
