@@ -98,6 +98,31 @@ function parseFile(igc: IGCParser.IGCFile, launches: Launch[]): LogRecord {
 }
 
 /*
+ * Merge flights by updating the comments from a CSV where the filenames match
+ */
+function mergeFlights(igcs: LogRecord[], csvs: LogRecord[]): LogRecord[] {
+  let flights: {[key: string]: LogRecord} = {}
+  const additional: LogRecord[] = [];
+
+  igcs.forEach(f => {
+    if(f.fileName === undefined) {
+      return;
+    }
+    flights[f.fileName] = f;
+  });
+
+  csvs.forEach(f => {
+    if (f.fileName !== undefined && f?.fileName in flights) {
+      flights[f.fileName].comment = f.comment;
+      return;
+    }
+    additional.push(f);
+  });
+
+  return [...Object.values(flights), ...additional];
+}
+
+/*
 * Loads in manually recorded flight records from CSV files.  Expect headers to match the LogRecord type
 */
 function parseCsvs(srcDirectory: string): LogRecord[] {
@@ -201,7 +226,7 @@ program
 
     // Import all IGC, vario logged flights
     let logbook = readdirSync(srcDirectory)
-      .filter((f) => f.endsWith(".igc"))
+      .filter((f) => f.toLowerCase().endsWith(".igc"))
       .map((f) => {
         const buffer = readFileSync(srcDirectory + "/" + f, {
           flag: "r",
@@ -214,7 +239,7 @@ program
       });
 
     // Import any manually logged flights
-    logbook = [...logbook, ...parseCsvs(srcDirectory)];
+    logbook = mergeFlights(logbook, parseCsvs(srcDirectory));
 
     // Insert the launch name
     if(options["sitesFile"]) {
