@@ -1,3 +1,9 @@
+# This project is **ARCHIVED** and should no longer be considered.
+
+> :warning: Instead, the entire pipeline has been moved into my website now.  Please see github.com/scottyob/nextjs-website for a more streamlined approach
+
+---
+
 This project is intended to take in flight logs in the format of both:
 - [IGC files][def]
 - Manual entries from a CSV
